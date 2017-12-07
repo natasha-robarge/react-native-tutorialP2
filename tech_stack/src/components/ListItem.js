@@ -1,28 +1,59 @@
-import React, { Component } from 'react';
-import { View, Text, TouchableWithoutFeedback } from 'react-native';
-import { connect } from 'react-redux';
-import { CardSection } from './common';
-import * as actions from '../actions';
+import React, { Component } from 'react'
+import {
+  LayoutAnimation,
+  Text,
+  TouchableWithoutFeedback,
+  View
+} from 'react-native'
+import { connect } from 'react-redux'
+import { CardSection } from './common/CardSection'
+import * as actions from '../actions'
 
 class ListItem extends Component {
+  componentWillUpdate() {
+    LayoutAnimation.spring()
+  }
+
+  renderDescription() {
+    const { library, expanded } = this.props
+
+    if (expanded) {
+      return (
+        <CardSection>
+          <Text style={{ flex: 1 }}>
+            {library.description}
+          </Text>
+        </CardSection>
+      )
+    }
+  }
+
   render() {
-    const { titleStyle } = styles;
-    const { id, title } = this.props.library
+    const { library, selectedLibraryId, selectLibrary } = this.props
+    const { id, title } = library
 
     return (
       <TouchableWithoutFeedback
-        onPress={() => this.props.selectLibrary(id)}
+        onPress={() => {
+          selectedLibraryId !== id ? selectLibrary(id) : selectLibrary(null)
+        }}
       >
         <View>
-        <CardSection>
-          <Text style={titleStyle}>
-            {title}
-          </Text>
-        </CardSection>
+          <CardSection>
+            <Text style={styles.titleStyle}>{title}</Text>
+          </CardSection>
+          {this.renderDescription()}
         </View>
       </TouchableWithoutFeedback>
-    );
+    )
   }
+}
+
+const mapStateToProps = (state, ownProps) => {
+  const { selectedLibraryId } = state
+  const expanded = selectedLibraryId === ownProps.library.id
+
+  return { selectedLibraryId, expanded }
 }
 
 const styles = {
@@ -32,4 +63,4 @@ const styles = {
   }
 }
 
-export default connect(null, actions)(ListItem);
+export default connect(mapStateToProps, actions)(ListItem)
